@@ -52,7 +52,7 @@ import Remote.Response as Response exposing (Response)
 
 Note: Based on [Kris's `RemoteData`][original].
 
-[original]: https://package.elm-lang.org/packages/krisajenkins/remotedata/latest/RemoteData#RemoteData
+[original]: /packages/krisajenkins/remotedata/latest/RemoteData#RemoteData
 
 -}
 type RemoteData transportError customError object
@@ -69,8 +69,8 @@ Because that case is so common, `GraphqlHttpData` is provided as a useful alias.
 
 Note: Based on [Kris's `WebData`][original].
 
-[GraphqlError]: https://package.elm-lang.org/packages/dillonkearns/elm-graphql/latest/Graphql-Http-GraphqlError
-[original]: https://package.elm-lang.org/packages/krisajenkins/remotedata/latest/RemoteData#RemoteData
+[GraphqlError]: /packages/dillonkearns/elm-graphql/latest/Graphql-Http-GraphqlError
+[original]: /packages/krisajenkins/remotedata/latest/RemoteData#RemoteData
 
 -}
 type alias GraphqlHttpData error object =
