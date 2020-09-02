@@ -57,8 +57,6 @@ import Remote.Errors exposing (RemoteError(..))
 import Remote.Response as Response exposing (Response)
 
 
-{-| REVIEW: Better names for "Fabricating" and "Recycling"
--}
 type Recyclable transportError customError object
     = NeverAsked
     | Fabricating (SubState transportError customError)

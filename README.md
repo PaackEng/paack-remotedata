@@ -4,13 +4,15 @@ A different approach to [Kris Jenkins' RemoteData](https://github.com/krisajenki
 
 ## Differences
 
-We always fetch some data and expect transmission errors (e.g., HTTP failures, GraphQL failures) to occur. Besides that, there are also decoding failures. Because of those, our models always end up with a type like `RemoteData FailurePlusDecodeErrors SomeData`.
+We always fetch some data and expect transmission errors (e.g., HTTP failures, Graphql failures) to occur.
+Besides that, there are also custom failures (e.g., invalid credentials, invalid input).
+Because of those, our models always end up with a type like `RemoteData FailurePlusCustomErrors SomeData`.
 
 With that in mind, and to reduce code repetition, we decided to merge both failures within Kris Jenkins' RemoteData.
 
 Alongside that, we came up with a structure for when some information is reloading, we don't choose the previously loaded one. We called it Recyclable.
 
-Another big difference here is that our star is not `Http.Error`, but `Graphql.HttpError` instead. But support for different transmission protocols is achievable using the more abstract types.
+Another big difference here is that our star is not `Http.Error`, but `Graphql.Http.HttpError` instead. But support for different transmission protocols is achievable using the more abstract types.
 
 
 ## Installation
@@ -32,7 +34,7 @@ See [package's page](http://package.elm-lang.org/packages/PaackEng/paack-remoted
 Here's an example of how to use this package:
 
 ```elm
--- GraphQl queries, data types, and errors unions.
+-- Graphql queries, data types, and errors unions.
 import Api.Author as Author exposing (Author)
 import Api.Authors as Authors exposing (AuthorBrief)
 -- Elm-UI

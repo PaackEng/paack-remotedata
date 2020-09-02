@@ -42,6 +42,19 @@ import Remote.Errors exposing (RemoteError(..))
 import Remote.Response as Response exposing (Response)
 
 
+{-| Frequently when you're fetching data from an API, you want to represent four different states:
+
+  - `NotAsked` - We haven't asked for the data yet.
+  - `Loading` - We've asked, but haven't got an answer yet.
+  - `Failure (Custom error)` - We asked, we received but something plausible went wrong. Here's the error.
+  - `Failure (Transport error)` - We asked, but something went wrong on the network-side. Here's the error.
+  - `Success data` - Everything worked, and here's the data.
+
+Note: Based on [Kris's `RemoteData`][original].
+
+[original]: https://package.elm-lang.org/packages/krisajenkins/remotedata/latest/RemoteData#RemoteData
+
+-}
 type RemoteData transportError customError object
     = NotAsked
     | Loading
@@ -49,6 +62,17 @@ type RemoteData transportError customError object
     | Success object
 
 
+{-| While [`RemoteData`](#RemoteData) can model any type of errors,
+the most common one we'll actually encounter is when we fetch data from a Graphql query,
+and get back [`GraphqlError`][GraphqlError].
+Because that case is so common, `GraphqlHttpData` is provided as a useful alias.
+
+Note: Based on [Kris's `WebData`][original].
+
+[GraphqlError]: https://package.elm-lang.org/packages/dillonkearns/elm-graphql/latest/Graphql-Http-GraphqlError
+[original]: https://package.elm-lang.org/packages/krisajenkins/remotedata/latest/RemoteData#RemoteData
+
+-}
 type alias GraphqlHttpData error object =
     RemoteData (GraphqlHttp.RawError () GraphqlHttp.HttpError) error object
 
