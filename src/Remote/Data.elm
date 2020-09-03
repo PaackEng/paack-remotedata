@@ -16,7 +16,7 @@ Note: Based on [Kris's `RemoteData`][original].
 
 # Types
 
-@docs RemoteData, SubState, GraphqlHttpData
+@docs RemoteData, GraphqlHttpData
 
 
 # Update
@@ -32,10 +32,6 @@ Note: Based on [Kris's `RemoteData`][original].
 # Common transformations
 
 @docs getError
-
-
-# Generic transformations
-
 @docs map, mapCustomError, mapTransportError, mapErrors
 @docs withDefault, merge
 
@@ -74,7 +70,7 @@ Because of that, `GraphqlHttpData` is provided as a useful alias.
 Note: Based on [Kris's `WebData`][original].
 
 [GraphqlError]: /packages/dillonkearns/elm-graphql/latest/Graphql-Http-GraphqlError
-[original]: /packages/krisajenkins/remotedata/latest/RemoteData#RemoteData
+[original]: /packages/krisajenkins/remotedata/latest/RemoteData#WebData
 
 -}
 type alias GraphqlHttpData error object =
@@ -100,8 +96,8 @@ fromResponse response =
             Success object
 
 
-{-| If the result is `Success` return the value,
-but if the result is anything else then return a given default value.
+{-| If the data is `Success` return its value,
+but if the data is anything else then return a given default alternative.
 
 **NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
 
@@ -144,8 +140,8 @@ merge default data =
             object
 
 
-{-| Apply a function to a `RemoteData.Success`. If the result is `Success`, it will be converted.
-If the result is anything else, the same value will propagate through.
+{-| Apply a function to a `RemoteData.Success`. If the data is `Success`, it will be converted.
+If the data is anything else, the same value will propagate through.
 -}
 map : (a -> b) -> RemoteData transportError customError a -> RemoteData transportError customError b
 map applier data =
@@ -163,8 +159,8 @@ map applier data =
             Success (applier object)
 
 
-{-| Transform a `Failure` value. If the result is `Failure`, it will be converted.
-If the result is a anything else, the same value will propagate through.
+{-| Transform a `Failure` value. If the data is `Failure`, it will be converted.
+If the data is a anything else, the same value will propagate through.
 -}
 mapErrors : (RemoteError transportError customError -> a) -> RemoteData transportError customError b -> RemoteData a a b
 mapErrors applier data =
@@ -185,8 +181,8 @@ mapErrors applier data =
             Success object
 
 
-{-| Transform a `Failure (Custom a)` value. If the result is `Failure (Custom a)`, it will be converted.
-If the result is a anything else, the same value will propagate through.
+{-| Transform a `Failure (Custom a)` value. If the data is `Failure (Custom a)`, it will be converted.
+If the data is a anything else, the same value will propagate through.
 -}
 mapCustomError : (customError -> a) -> RemoteData transportError customError object -> RemoteData transportError a object
 mapCustomError applier response =
@@ -207,8 +203,8 @@ mapCustomError applier response =
             Success object
 
 
-{-| Transform a `Failure (Transport a)` value. If the result is `Failure (Transport a)`, it will be converted.
-If the result is a anything else, the same value will propagate through.
+{-| Transform a `Failure (Transport a)` value. If the data is `Failure (Transport a)`, it will be converted.
+If the data is a anything else, the same value will propagate through.
 -}
 mapTransportError : (transportError -> a) -> RemoteData transportError customError object -> RemoteData a customError object
 mapTransportError applier response =
