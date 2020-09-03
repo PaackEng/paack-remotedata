@@ -46,7 +46,7 @@ import Remote.Errors exposing (RemoteError(..))
 import Remote.Response as Response exposing (Response)
 
 
-{-| Frequently when you're fetching data from an API, you want to represent four different states:
+{-| Frequently when you're fetching data from an API, you want to represent five different states:
 
   - `NotAsked` - We haven't asked for the data yet.
   - `Loading` - We've asked, but haven't got an answer yet.

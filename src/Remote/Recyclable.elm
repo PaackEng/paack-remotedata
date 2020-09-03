@@ -9,7 +9,36 @@ module Remote.Recyclable exposing
     , getError
     )
 
-{-|
+{-| This module extends [`Data`](Remote-Data) preserving the information when reloading the same source.
+
+It helps in scenarios with like this:
+
+1.  Data was never requested
+      - `= Recyclable.NeverAsked`
+2.  Request was sent
+      - `|> Recyclable.toLoading`
+      - `== Recyclable.Fabricating Recyclable.Loading`
+3.  Request's `Response` was received (a `Failure _`)
+      - `|> Recyclable.mergeResponse response`
+      - `== Recyclable.Fabricating (Recyclable.Failure _)`
+4.  User press "Retry", a new request was sent
+      - `|> Recyclable.toLoading`
+      - `== Recyclable.Fabricating Recyclable.Loading`
+5.  Request's `Response` was received (a `Success data`)
+      - `|> Recyclable.mergeResponse response`
+      - `== Recyclable.Ready data`
+6.  User press "Refresh", a new request was sent
+      - `|> Recyclable.toLoading`
+      - `== Recyclable.Fabricating (Recyclable.Recycling data Recyclable.Loading)`
+7.  Request's `Response` was received (a `Failure _`)
+      - `|> Recyclable.mergeResponse response`
+      - `== Recyclable.Ready (Recyclable.Recycling data (Recyclable.Failure _))`
+8.  User press "Refresh", a new request was sent
+      - `|> Recyclable.toLoading`
+      - `== Recyclable.Fabricating (Recyclable.Recycling data Recyclable.Loading)`
+9.  Request's `Response` was received (a `Success`)
+      - `|> Recyclable.mergeResponse response`
+      - `== Recyclable.Ready _`
 
 
 # Types
@@ -57,6 +86,35 @@ import Remote.Errors exposing (RemoteError(..))
 import Remote.Response as Response exposing (Response)
 
 
+{-| A `Recyclable` is
+
+First routine:
+
+  - `NotAsked`
+      - We haven't asked for the data yet.
+  - `Fabricating Loading`
+      - We've asked, but haven't got an answer yet.
+  - `Fabricating (Failure (Custom error))`
+      - We asked, but we received one of the custom-defined errors instead.
+        Here's the error.
+  - `Fabricating (Failure (Transport error))`
+      - We asked, but something went wrong on the network-side.
+        Here's the error.
+  - `Ready data`
+      - Everything worked, and here's the data.
+
+Future cycles:
+
+  - `Recycling data Loading`
+      - We asked once more, and didn't got the new answer yet. Here's the previous data.
+  - `Recycling data (Failure (Custom error))`
+      - We asked once more, but the new answer was one of the custom-defined errors instead.
+        Here's the previous data and the current error.
+  - `Recycling data (Failure (Transport error))`
+      - We asked once more, but the new request got lost on the network-side.
+        Here's the previous data and the current error.
+
+-}
 type Recyclable transportError customError object
     = NeverAsked
     | Fabricating (SubState transportError customError)
@@ -102,7 +160,7 @@ mergeResponse response data =
                     Recycling object (Failure error)
 
 
-{-| **NOTE**: In most cases, you should be using `mergeResponse` instead of `fromResponse`.
+{-| **NOTE**: As this function discards the previous information, in most cases you shold be using `mergeResponse` instead.
 -}
 fromResponse :
     Response transportError customError object
