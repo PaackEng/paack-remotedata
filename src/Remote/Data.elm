@@ -53,7 +53,7 @@ import Remote.Response as Response exposing (Response)
   - `Failure (Transport error)` - We asked, but something went wrong on the network-side. Here's the error.
   - `Success data` - Everything worked, and here's the data.
 
-Note: Based on [Kris's `RemoteData`][original].
+Based on [Kris's `RemoteData`][original].
 
 [original]: /packages/krisajenkins/remotedata/latest/RemoteData#RemoteData
 
@@ -70,7 +70,7 @@ the most common one Paack has encountered is when fetching data from a Graphql q
 and get back [`GraphqlError`][GraphqlError].
 Because of that, `GraphqlHttpData` is provided as a useful alias.
 
-Note: Based on [Kris's `WebData`][original].
+Based on [Kris's `WebData`][original].
 
 [GraphqlError]: /packages/dillonkearns/elm-graphql/latest/Graphql-Http-GraphqlError
 [original]: /packages/krisajenkins/remotedata/latest/RemoteData#WebData
@@ -82,7 +82,7 @@ type alias GraphqlHttpData error object =
 
 {-| Convert a `Response`, probably produced from a query result, to a `RemoteData` value.
 
-Note: Based on [Kris's `fromResult`][original].
+Based on [Kris's `fromResult`][original].
 
 [original]: /packages/krisajenkins/remotedata/latest/RemoteData#fromResult
 
