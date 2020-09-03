@@ -46,7 +46,7 @@ import Remote.Response as Response exposing (Response)
 
   - `NotAsked` - We haven't asked for the data yet.
   - `Loading` - We've asked, but haven't got an answer yet.
-  - `Failure (Custom error)` - We asked, we received but something plausible went wrong. Here's the error.
+  - `Failure (Custom error)` - We asked, but we received one of the custom-defined errors instead. Here's the error.
   - `Failure (Transport error)` - We asked, but something went wrong on the network-side. Here's the error.
   - `Success data` - Everything worked, and here's the data.
 

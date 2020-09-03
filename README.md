@@ -35,7 +35,7 @@ $ elm install PaackEng/paack-remotedata
 
 ## Documentation
 
-See [package's page](http://package.elm-lang.org/packages/PaackEng/paack-remotedata/latest) for all the modules' documentation.
+See [package's page](http://package.elm-lang.org/packages/PaackEng/paack-remotedata/latest) for the complete documentation.
 
 
 ## Usage
