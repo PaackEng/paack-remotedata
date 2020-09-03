@@ -255,9 +255,9 @@ fromResponse response =
 
 
 {-| If the recyclable is `Success` return the value,
-but if the recyclable is anything else then return a given default value.
+but if the recyclable is anything else, then return a given default value.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 withDefault : object -> Recyclable transportError customError object -> object
@@ -270,7 +270,7 @@ withDefault default data =
             default
 
 
-{-| Perfumary for doing pipes instead of switch-case
+{-| Perfumery for doing pipes instead of switch-case
 -}
 merge : object -> Recyclable object object object -> object
 merge default data =
@@ -339,7 +339,7 @@ map applier data =
 
 
 {-| Transform a `Failure` value. If the data is `Failure`, it will be converted.
-If the data is a anything else, the same value will propagate through.
+If the data is anything else, the same value will propagate through.
 -}
 mapErrors : (RemoteError transportError customError -> a) -> Recyclable transportError customError b -> Recyclable a a b
 mapErrors applier data =
@@ -370,7 +370,7 @@ mapErrors applier data =
 
 
 {-| Transform a `Failure (Custom a)` value. If the data is `Failure (Custom a)`, it will be converted.
-If the data is a anything else, the same value will propagate through.
+If the data is anything else, the same value will propagate through.
 -}
 mapCustomError : (customError -> a) -> Recyclable transportError customError object -> Recyclable transportError a object
 mapCustomError applier response =
@@ -401,7 +401,7 @@ mapCustomError applier response =
 
 
 {-| Transform a `Failure (Transport a)` value. If the data is `Failure (Transport a)`, it will be converted.
-If the data is a anything else, the same value will propagate through.
+If the data is anything else, the same value will propagate through.
 -}
 mapTransportError : (transportError -> a) -> Recyclable transportError customError object -> Recyclable a customError object
 mapTransportError applier response =
@@ -433,7 +433,7 @@ mapTransportError applier response =
 
 {-| Transforms `Failure error` into `Just error`, and anything else into `Nothing`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 getError : Recyclable transportError customError object -> Maybe (RemoteError transportError customError)
@@ -451,7 +451,7 @@ getError data =
 
 {-| `True` when `Ready _`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isReady : Recyclable transportError customError object -> Bool
@@ -466,7 +466,7 @@ isReady data =
 
 {-| `True` when `_ Loading`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isLoading : Recyclable transportError customError object -> Bool
@@ -484,7 +484,7 @@ isLoading data =
 
 {-| `True` when `_ (Failure _)`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isError : Recyclable transportError customError object -> Bool
@@ -502,7 +502,7 @@ isError data =
 
 {-| `True` when `_ (Failure (Transport _))`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isTransportError : Recyclable transportError customError object -> Bool
@@ -520,7 +520,7 @@ isTransportError data =
 
 {-| `True` when `_ (Failure (Custom _))`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isCustomError : Recyclable transportError customError object -> Bool
@@ -538,7 +538,7 @@ isCustomError data =
 
 {-| `True` when `NeverAsked`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isNeverAsked : Recyclable transportError customError object -> Bool

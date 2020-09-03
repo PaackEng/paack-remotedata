@@ -102,7 +102,7 @@ fromResponse response =
 {-| If the data is `Success` return its value,
 but if the data is anything else then return a given default alternative.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 withDefault : object -> RemoteData transportError customError object -> object
@@ -115,7 +115,7 @@ withDefault default data =
             default
 
 
-{-| Perfumary for doing pipes instead of switch-case.
+{-| Perfumery for doing pipes instead of switch-case.
 
     someData
         |> RemoteData.map (always "Success")
@@ -163,7 +163,7 @@ map applier data =
 
 
 {-| Transform a `Failure` value. If the data is `Failure`, it will be converted.
-If the data is a anything else, the same value will propagate through.
+If the data is anything else, the same value will propagate through.
 -}
 mapErrors : (RemoteError transportError customError -> a) -> RemoteData transportError customError b -> RemoteData a a b
 mapErrors applier data =
@@ -185,7 +185,7 @@ mapErrors applier data =
 
 
 {-| Transform a `Failure (Custom a)` value. If the data is `Failure (Custom a)`, it will be converted.
-If the data is a anything else, the same value will propagate through.
+If the data is anything else, the same value will propagate through.
 -}
 mapCustomError : (customError -> a) -> RemoteData transportError customError object -> RemoteData transportError a object
 mapCustomError applier response =
@@ -207,7 +207,7 @@ mapCustomError applier response =
 
 
 {-| Transform a `Failure (Transport a)` value. If the data is `Failure (Transport a)`, it will be converted.
-If the data is a anything else, the same value will propagate through.
+If the data is anything else, the same value will propagate through.
 -}
 mapTransportError : (transportError -> a) -> RemoteData transportError customError object -> RemoteData a customError object
 mapTransportError applier response =
@@ -230,7 +230,7 @@ mapTransportError applier response =
 
 {-| Transforms `Failure error` into `Just error`, and anything else into `Nothing`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 getError : RemoteData transportError customError object -> Maybe (RemoteError transportError customError)
@@ -251,7 +251,7 @@ getError data =
 
 {-| `True` when `Success _`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isSuccess : RemoteData transportError customError object -> Bool
@@ -266,7 +266,7 @@ isSuccess data =
 
 {-| `True` when `Loading _`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isLoading : RemoteData transportError customError object -> Bool
@@ -281,7 +281,7 @@ isLoading data =
 
 {-| `True` when `Failure _`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isError : RemoteData transportError customError object -> Bool
@@ -296,7 +296,7 @@ isError data =
 
 {-| `True` when `Failure (Transport _)`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isTransportError : RemoteData transportError customError object -> Bool
@@ -311,7 +311,7 @@ isTransportError data =
 
 {-| `True` when `Failure (isCustomError _)`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isCustomError : RemoteData transportError customError object -> Bool
@@ -326,7 +326,7 @@ isCustomError data =
 
 {-| `True` when `NotAsked`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isNotAsked : RemoteData transportError customError object -> Bool

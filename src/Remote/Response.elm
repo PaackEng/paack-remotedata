@@ -70,7 +70,7 @@ type alias GraphqlHttpResponse customError object =
 
 {-| `True` when `Success _`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isSuccess : Response transportError customError object -> Bool
@@ -85,7 +85,7 @@ isSuccess response =
 
 {-| `True` when `Failure _`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isFailure : Response transportError customError object -> Bool
@@ -100,7 +100,7 @@ isFailure response =
 
 {-| `True` when `Failure (Custom _)`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isCustomError : Response transportError customError object -> Bool
@@ -115,7 +115,7 @@ isCustomError response =
 
 {-| `True` when `Failure (Transport _)`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 isTransportError : Response transportError customError object -> Bool
@@ -152,7 +152,7 @@ fromResults results =
 {-| Convert to a simpler `Maybe` if the actual error message is not needed or
 you need to interact with some code that primarily uses maybes.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 toMaybe : Response transportError customError object -> Maybe object
@@ -167,7 +167,7 @@ toMaybe response =
 
 {-| Transforms `Failure error` into `Just error`, and `Success _` into `Nothing`.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 getError : Response transportError customError object -> Maybe (RemoteError transportError customError)
@@ -263,7 +263,7 @@ mapTransportError applier response =
 {-| If the result is `Success` return the value,
 but if the result is a `Failure` then return a given default value.
 
-**NOTE**: This function implicates in information-loss, prefer using a switch-case, or use it very wisely.
+**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
 
 -}
 withDefault : object -> Response transportError customError object -> object
@@ -276,7 +276,7 @@ withDefault default response =
             object
 
 
-{-| Perfumary for doing pipes instead of switch-case.
+{-| Perfumery for doing pipes instead of switch-case.
 
     someResponse
         |> Response.map (always "Success")
