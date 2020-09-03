@@ -8,6 +8,7 @@ module Remote.Response exposing
     )
 
 {-| This module exists for harmonizing queries results with the rest of this package.
+
 Without it, the type of these results would need to be something like `Response transportError (Response customError object)`.
 
 

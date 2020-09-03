@@ -13,31 +13,79 @@ module Remote.Recyclable exposing
 It helps in scenarios with like this:
 
 1.  Data was never requested
-      - `= Recyclable.NeverAsked`
+      - Start it with `Recyclable.NeverAsked`
+
 2.  Request was sent
-      - `|> Recyclable.toLoading`
-      - `== Recyclable.Fabricating Recyclable.Loading`
-3.  Request's `Response` was received (a `Failure _`)
-      - `|> Recyclable.mergeResponse response`
-      - `== Recyclable.Fabricating (Recyclable.Failure _)`
-4.  User press "Retry", a new request was sent
-      - `|> Recyclable.toLoading`
-      - `== Recyclable.Fabricating Recyclable.Loading`
+      - Pipe it into:
+
+            |> Recyclable.toLoading
+
+      - At this point, it will be:
+
+            Recyclable.Fabricating Recyclable.Loading
+
+3.  Request's `Response` was received (a `Failure error`)
+      - Pipe it into:
+
+            |> Recyclable.mergeResponse response
+
+      - At this point, it will be:
+
+            Recyclable.Fabricating (Recyclable.Failure error)
+
+4.  User press "Retry" button, a new request was sent
+      - Pipe it into:
+
+            |> Recyclable.toLoading
+
+      - At this point, it will be:
+
+            Recyclable.Fabricating Recyclable.Loading
+
 5.  Request's `Response` was received (a `Success data`)
-      - `|> Recyclable.mergeResponse response`
-      - `== Recyclable.Ready data`
-6.  User press "Refresh", a new request was sent
-      - `|> Recyclable.toLoading`
-      - `== Recyclable.Fabricating (Recyclable.Recycling data Recyclable.Loading)`
-7.  Request's `Response` was received (a `Failure _`)
-      - `|> Recyclable.mergeResponse response`
-      - `== Recyclable.Ready (Recyclable.Recycling data (Recyclable.Failure _))`
-8.  User press "Refresh", a new request was sent
-      - `|> Recyclable.toLoading`
-      - `== Recyclable.Fabricating (Recyclable.Recycling data Recyclable.Loading)`
-9.  Request's `Response` was received (a `Success`)
-      - `|> Recyclable.mergeResponse response`
-      - `== Recyclable.Ready _`
+      - Pipe it into:
+
+            |> Recyclable.mergeResponse response
+
+      - At this point, it will be:
+
+            Recyclable.Ready data
+
+6.  User press "Refresh" button, a new request was sent
+      - Pipe it into:
+
+            |> Recyclable.toLoading
+
+      - At this point, it will be:
+
+            Recyclable.Fabricating (Recyclable.Recycling data Recyclable.Loading)
+
+7.  Request's `Response` was received (a `Failure error`)
+      - Pipe it into:
+
+            |> Recyclable.mergeResponse response
+
+      - At this point, it will be:
+
+            Recyclable.Ready (Recyclable.Recycling data (Recyclable.Failure error))
+
+8.  User press "Refresh" button, a new request was sent
+      - Pipe it into:
+
+            |> Recyclable.toLoading
+
+      - At this point, it will be:
+
+            Recyclable.Fabricating (Recyclable.Recycling data Recyclable.Loading)
+
+9.  Request's `Response` was received (a `Success data`)
+      - Pipe it into:
+
+            |> Recyclable.mergeResponse response
+
+      - At this point, it will be:
+
+            Recyclable.Ready data
 
 
 # Types
@@ -49,9 +97,9 @@ It helps in scenarios with like this:
 
 First, when initializing a "Model", you will use either:
 
-    - `Recyclable.NeverAsked`
+  - `Recyclable.NeverAsked`
 
-    - `(Recyclable.firstLoading, modelRequestCmd)`
+  - `(Recyclable.firstLoading, modelRequestCmd)`
 
 @docs firstLoading
 

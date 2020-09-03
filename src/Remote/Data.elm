@@ -7,9 +7,12 @@ module Remote.Data exposing
     , withDefault, merge
     )
 
-{-| A datatype representing fetched data.
+{-| A datatype representing fetched data in five different states.
+Based on [Kris's `RemoteData`][original].
 
-Note: Based on [Kris's `RemoteData`][original].
+For the same motivations that are presented in Kris' version,
+with the small addition of always using [transport and custom errors](Remote-Errors),
+and aliasing `GraphqlError` instead of `Http.Error`.
 
 [original]: /packages/krisajenkins/remotedata/latest/RemoteData
 
@@ -79,7 +82,7 @@ type alias GraphqlHttpData error object =
 
 {-| Convert a `Response`, probably produced from a query result, to a `RemoteData` value.
 
-Note: Based on [Kris's `RemoteData`][original].
+Note: Based on [Kris's `fromResult`][original].
 
 [original]: /packages/krisajenkins/remotedata/latest/RemoteData#fromResult
 
