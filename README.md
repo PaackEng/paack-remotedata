@@ -2,17 +2,26 @@
 
 A different approach to [Kris Jenkins' RemoteData](https://github.com/krisajenkins/remotedata).
 
+
 ## Differences
 
-We always fetch some data and expect transmission errors (e.g., HTTP failures, Graphql failures) to occur.
-Besides that, there are also custom failures (e.g., invalid credentials, invalid input).
-Because of those, our models always end up with a type like `RemoteData FailurePlusCustomErrors SomeData`.
+* RemoteData.Failure is always sub-divided into transmission errors and custom errors;
+* An extra module "Recyclable" for reusing information while fresh data is loading;
+* There are shorthand types for data loaded using Graphql.
 
-With that in mind, and to reduce code repetition, we decided to merge both failures within Kris Jenkins' RemoteData.
 
-Alongside that, we came up with a structure for when some information is reloading, we don't choose the previously loaded one. We called it Recyclable.
+## Why?
 
-Another big difference here is that our star is not `Http.Error`, but `Graphql.Http.HttpError` instead. But support for different transmission protocols is achievable using the more abstract types.
+Using Kris' RemoteData, our team realized that we needed to support both the transport errors (e.g., Graphql errors, HTTP errors) and any other custom error sent by our API (e.g., invalid credentials and invalid input).
+That way, our models were ending up with types like `RemoteData TransportErrorsPlusCustomErrors SomeData`.
+
+With that in mind, and to reduce code repetition, we decided to merge both failures within RemoteData.
+
+Alongside that, we came up with a structure for when some information is reloading, and we do not loose the previously loaded one.
+We called it Recyclable.
+
+Following our use-case scenarios, we changed the main star from `Http.Error` to `Graphql.Http.HttpError` instead.
+However, support for a different transport protocol is achievable using more abstract types.
 
 
 ## Installation
@@ -161,6 +170,7 @@ selectedAuthorView model =
         Recyclable.Ready { name } ->
             Element.text ("You picked: " ++ name)
 ```
+
 
 ## License
 

@@ -63,9 +63,9 @@ type RemoteData transportError customError object
 
 
 {-| While [`RemoteData`](#RemoteData) can model any type of errors,
-the most common one we'll actually encounter is when we fetch data from a Graphql query,
+the most common one Paack has encountered is when fetching data from a Graphql query,
 and get back [`GraphqlError`][GraphqlError].
-Because that case is so common, `GraphqlHttpData` is provided as a useful alias.
+Because of that, `GraphqlHttpData` is provided as a useful alias.
 
 Note: Based on [Kris's `WebData`][original].
 
