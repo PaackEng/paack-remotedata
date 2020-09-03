@@ -5,7 +5,7 @@ A different approach to [Kris Jenkins' RemoteData](https://github.com/krisajenki
 
 ## Differences
 
-* RemoteData.Failure is always sub-divided into transmission errors and custom errors;
+* RemoteData.Failure is always sub-divided into transport errors and custom errors;
 * An extra module "Recyclable" for reusing information while fresh data is loading;
 * There are shorthand types for data loaded using Graphql.
 
