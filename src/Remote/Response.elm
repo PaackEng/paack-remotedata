@@ -198,7 +198,7 @@ graphqlHttpToMsg message input =
         |> message
 
 
-{-| Apply a function to a result. If the result is `Success`, it will be converted.
+{-| Apply a function to a posive result. If the result is `Success`, it will be converted.
 If the result is a `Failure`, the same error value will propagate through.
 -}
 map : (a -> b) -> Response transportError customError a -> Response transportError customError b
@@ -275,7 +275,7 @@ withDefault default response =
             object
 
 
-{-| Perfumary for doing pipes instead of switch-case
+{-| Perfumary for doing pipes instead of switch-case.
 
     someResponse
         |> Response.map (always "Success")
