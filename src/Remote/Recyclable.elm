@@ -1,12 +1,11 @@
 module Remote.Recyclable exposing
-    ( Recyclable(..), GraphqlHttpRecyclable
+    ( Recyclable(..), RecyclingStage(..), GraphqlHttpRecyclable
     , firstLoading
     , mergeResponse, toLoading, fromResponse
     , isReady, isError, isCustomError, isTransportError, isLoading, isNeverAsked
     , toError
     , map, mapCustomError, mapTransportError, mapErrors
     , withDefault, merge
-    , RecyclingStage(..)
     )
 
 {-| This module extends [`Data`](Remote-Data) preserving the information when reloading the same source.
@@ -23,7 +22,7 @@ It helps in scenarios with like this:
 
       - At this point, it will be:
 
-            Recyclable.Fabricating Recyclable.Loading
+            Recyclable.Loading
 
 3.  Request's `Response` was received (a `Failure error`)
       - Pipe it into:
@@ -32,7 +31,7 @@ It helps in scenarios with like this:
 
       - At this point, it will be:
 
-            Recyclable.Fabricating (Recyclable.Failure error)
+            Recyclable.Failure error
 
 4.  User press "Retry" button, a new request was sent
       - Pipe it into:
@@ -41,7 +40,7 @@ It helps in scenarios with like this:
 
       - At this point, it will be:
 
-            Recyclable.Fabricating Recyclable.Loading
+            Recyclable.Loading
 
 5.  Request's `Response` was received (a `Success data`)
       - Pipe it into:
@@ -59,7 +58,7 @@ It helps in scenarios with like this:
 
       - At this point, it will be:
 
-            Recyclable.Fabricating (Recyclable.Recycling data Recyclable.Loading)
+            Recyclable.Recycling data Recyclable.Loading
 
 7.  Request's `Response` was received (a `Failure error`)
       - Pipe it into:
@@ -77,7 +76,7 @@ It helps in scenarios with like this:
 
       - At this point, it will be:
 
-            Recyclable.Fabricating (Recyclable.Recycling data Recyclable.Loading)
+            Recyclable.Recycling data Recyclable.Loading
 
 9.  Request's `Response` was received (a `Success data`)
       - Pipe it into:
@@ -91,7 +90,7 @@ It helps in scenarios with like this:
 
 # Types
 
-@docs Recyclable, SubState, GraphqlHttpRecyclable
+@docs Recyclable, RecyclingStage, GraphqlHttpRecyclable
 
 
 # Model
