@@ -1,15 +1,91 @@
 module Remote.Recyclable exposing
     ( Recyclable(..), SubState(..), GraphqlHttpRecyclable
     , firstLoading
-    , mergeResponse, fromResponse
+    , mergeResponse, toLoading, fromResponse
     , isReady, isError, isCustomError, isTransportError, isLoading, isNeverAsked
-    , toLoading
+    , toError
     , map, mapCustomError, mapTransportError, mapErrors
     , withDefault, merge
-    , getError
     )
 
-{-|
+{-| This module extends [`Data`](Remote-Data) preserving the information when reloading the same source.
+
+It helps in scenarios with like this:
+
+1.  Data was never requested
+      - Start it with `Recyclable.NeverAsked`
+
+2.  Request was sent
+      - Pipe it into:
+
+            |> Recyclable.toLoading
+
+      - At this point, it will be:
+
+            Recyclable.Fabricating Recyclable.Loading
+
+3.  Request's `Response` was received (a `Failure error`)
+      - Pipe it into:
+
+            |> Recyclable.mergeResponse response
+
+      - At this point, it will be:
+
+            Recyclable.Fabricating (Recyclable.Failure error)
+
+4.  User press "Retry" button, a new request was sent
+      - Pipe it into:
+
+            |> Recyclable.toLoading
+
+      - At this point, it will be:
+
+            Recyclable.Fabricating Recyclable.Loading
+
+5.  Request's `Response` was received (a `Success data`)
+      - Pipe it into:
+
+            |> Recyclable.mergeResponse response
+
+      - At this point, it will be:
+
+            Recyclable.Ready data
+
+6.  User press "Refresh" button, a new request was sent
+      - Pipe it into:
+
+            |> Recyclable.toLoading
+
+      - At this point, it will be:
+
+            Recyclable.Fabricating (Recyclable.Recycling data Recyclable.Loading)
+
+7.  Request's `Response` was received (a `Failure error`)
+      - Pipe it into:
+
+            |> Recyclable.mergeResponse response
+
+      - At this point, it will be:
+
+            Recyclable.Ready (Recyclable.Recycling data (Recyclable.Failure error))
+
+8.  User press "Refresh" button, a new request was sent
+      - Pipe it into:
+
+            |> Recyclable.toLoading
+
+      - At this point, it will be:
+
+            Recyclable.Fabricating (Recyclable.Recycling data Recyclable.Loading)
+
+9.  Request's `Response` was received (a `Success data`)
+      - Pipe it into:
+
+            |> Recyclable.mergeResponse response
+
+      - At this point, it will be:
+
+            Recyclable.Ready data
 
 
 # Types
@@ -19,20 +95,20 @@ module Remote.Recyclable exposing
 
 # Model
 
-When initializing a "Model", you will use either:
+First, when initializing a "Model", you will use either:
 
-    - `Recyclable.NeverAsked`
+  - `Recyclable.NeverAsked`
 
-    - `(Recyclable.firstLoading, requestCmd)`
+  - `(Recyclable.firstLoading, modelRequestCmd)`
 
 @docs firstLoading
 
 
 # Update
 
-On "update" you're gonna be using either:
+Then, on "update" you're gonna be using either:
 
-@docs mergeResponse, fromResponse
+@docs mergeResponse, toLoading, fromResponse
 
 
 # Identity crisis
@@ -40,13 +116,9 @@ On "update" you're gonna be using either:
 @docs isReady, isError, isCustomError, isTransportError, isLoading, isNeverAsked
 
 
-# State rollback
+# Common transformations
 
-@docs toLoading
-
-
-# Generic transformations
-
+@docs toError
 @docs map, mapCustomError, mapTransportError, mapErrors
 @docs withDefault, merge
 
@@ -57,7 +129,34 @@ import Remote.Errors exposing (RemoteError(..))
 import Remote.Response as Response exposing (Response)
 
 
-{-| REVIEW: Better names for "Fabricating" and "Recycling"
+{-| A representation for fetchable data with eight states:
+
+First routine states:
+
+  - `NotAsked`
+      - We haven't asked for the data yet.
+  - `Fabricating Loading`
+      - We've asked, but haven't got an answer yet.
+  - `Fabricating (Failure (Custom error))`
+      - We asked, but we received one of the custom-defined errors instead.
+        Here's the error.
+  - `Fabricating (Failure (Transport error))`
+      - We asked, but something went wrong on the network-side.
+        Here's the error.
+  - `Ready data`
+      - Everything worked, and here's the data.
+
+Future cycles states:
+
+  - `Recycling data Loading`
+      - We asked once more, and didn't got the new answer yet. Here's the previous data.
+  - `Recycling data (Failure (Custom error))`
+      - We asked once more, but the new answer was one of the custom-defined errors instead.
+        Here's the previous data and the current error.
+  - `Recycling data (Failure (Transport error))`
+      - We asked once more, but the new request got lost on the network-side.
+        Here's the previous data and the current error.
+
 -}
 type Recyclable transportError customError object
     = NeverAsked
@@ -66,20 +165,53 @@ type Recyclable transportError customError object
     | Recycling object (SubState transportError customError)
 
 
+{-| Indicates `Failure` and `Loading` state when data is/was being fetched.
+-}
 type SubState transportError customError
     = Loading
     | Failure (RemoteError transportError customError)
 
 
+{-| While [`Recyclable`](#Recyclable) can model any type of errors,
+the most common one Paack has encountered is when fetching data from a Graphql query,
+and getting back a [`GraphqlError`][GraphqlError].
+Because of that, `GraphqlHttpRecyclable` is provided as a useful alias.
+
+[GraphqlError]: /packages/dillonkearns/elm-graphql/latest/Graphql-Http-GraphqlError
+[original]: /packages/krisajenkins/remotedata/latest/RemoteData#WebData
+
+-}
 type alias GraphqlHttpRecyclable error object =
     Recyclable (GraphqlHttp.RawError () GraphqlHttp.HttpError) error object
 
 
+{-| It's very common to initialize the model already requesting the data,
+use `firstLoading` in this case. Like this:
+
+    init : RequestConfig -> ( Model, Cmd Msg )
+    init requestConfig =
+        ( Recyclable.firstLoading
+        , modelRequestCmd requestConfig
+        )
+
+-}
 firstLoading : Recyclable transportError customError object
 firstLoading =
     Fabricating Loading
 
 
+{-| This is the update routine for when overwriting the current
+data with a new freshily-fetched response.
+
+    update msg model =
+        case msg of
+            CardFetched response ->
+                { model
+                    | card =
+                        Recyclable.mergeResponse response model.card
+                }
+
+-}
 mergeResponse :
     Response transportError customError object
     -> Recyclable transportError customError object
@@ -104,7 +236,11 @@ mergeResponse response data =
                     Recycling object (Failure error)
 
 
-{-| **NOTE**: In most cases, you should be using `mergeResponse` instead of `fromResponse`.
+{-| Convert a `Response`, probably produced from a query result, to a `Recyclable` value.
+
+**NOTE**: As this function discards the previous information,
+in most cases you should be using `mergeResponse` instead.
+
 -}
 fromResponse :
     Response transportError customError object
@@ -118,6 +254,12 @@ fromResponse response =
             Ready object
 
 
+{-| If the recyclable is `Success` return the value,
+but if the recyclable is anything else, then return a given default value.
+
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
+
+-}
 withDefault : object -> Recyclable transportError customError object -> object
 withDefault default data =
     case data of
@@ -128,7 +270,7 @@ withDefault default data =
             default
 
 
-{-| Perfumary for doing pipes instead of switch-case
+{-| For doing pipes instead of switch-case
 -}
 merge : object -> Recyclable object object object -> object
 merge default data =
@@ -158,6 +300,9 @@ merge default data =
             object
 
 
+{-| Returns a `Recyclable` to its loading state.
+Keeping the information when available.
+-}
 toLoading : Recyclable transportError customError object -> Recyclable transportError customError object
 toLoading data =
     case data of
@@ -174,6 +319,9 @@ toLoading data =
             Recycling object Loading
 
 
+{-| Apply a function to the values in `Recycling value _` and `Ready value`.
+If the data is anything else, the same value will propagate through.
+-}
 map : (a -> b) -> Recyclable transportError customError a -> Recyclable transportError customError b
 map applier data =
     case data of
@@ -190,6 +338,9 @@ map applier data =
             Ready (applier object)
 
 
+{-| Transform a `Failure` value. If the data is `Failure`, it will be converted.
+If the data is anything else, the same value will propagate through.
+-}
 mapErrors : (RemoteError transportError customError -> a) -> Recyclable transportError customError b -> Recyclable a a b
 mapErrors applier data =
     case data of
@@ -218,6 +369,9 @@ mapErrors applier data =
             Ready object
 
 
+{-| Transform a `Failure (Custom a)` value. If the data is `Failure (Custom a)`, it will be converted.
+If the data is anything else, the same value will propagate through.
+-}
 mapCustomError : (customError -> a) -> Recyclable transportError customError object -> Recyclable transportError a object
 mapCustomError applier response =
     case response of
@@ -246,6 +400,9 @@ mapCustomError applier response =
             Ready object
 
 
+{-| Transform a `Failure (Transport a)` value. If the data is `Failure (Transport a)`, it will be converted.
+If the data is anything else, the same value will propagate through.
+-}
 mapTransportError : (transportError -> a) -> Recyclable transportError customError object -> Recyclable a customError object
 mapTransportError applier response =
     case response of
@@ -274,8 +431,13 @@ mapTransportError applier response =
             Ready object
 
 
-getError : Recyclable transportError customError object -> Maybe (RemoteError transportError customError)
-getError data =
+{-| Transforms `Failure error` into `Just error`, and anything else into `Nothing`.
+
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
+
+-}
+toError : Recyclable transportError customError object -> Maybe (RemoteError transportError customError)
+toError data =
     case data of
         Recycling _ (Failure error) ->
             Just error
@@ -283,19 +445,15 @@ getError data =
         Fabricating (Failure error) ->
             Just error
 
-        Fabricating _ ->
-            Nothing
-
-        Recycling _ _ ->
-            Nothing
-
-        NeverAsked ->
-            Nothing
-
-        Ready _ ->
+        _ ->
             Nothing
 
 
+{-| `True` when `Ready _`.
+
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
+
+-}
 isReady : Recyclable transportError customError object -> Bool
 isReady data =
     case data of
@@ -306,6 +464,11 @@ isReady data =
             False
 
 
+{-| `True` when `_ Loading`.
+
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
+
+-}
 isLoading : Recyclable transportError customError object -> Bool
 isLoading data =
     case data of
@@ -319,6 +482,11 @@ isLoading data =
             False
 
 
+{-| `True` when `_ (Failure _)`.
+
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
+
+-}
 isError : Recyclable transportError customError object -> Bool
 isError data =
     case data of
@@ -332,6 +500,11 @@ isError data =
             False
 
 
+{-| `True` when `_ (Failure (Transport _))`.
+
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
+
+-}
 isTransportError : Recyclable transportError customError object -> Bool
 isTransportError data =
     case data of
@@ -345,6 +518,11 @@ isTransportError data =
             False
 
 
+{-| `True` when `_ (Failure (Custom _))`.
+
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
+
+-}
 isCustomError : Recyclable transportError customError object -> Bool
 isCustomError data =
     case data of
@@ -358,6 +536,11 @@ isCustomError data =
             False
 
 
+{-| `True` when `NeverAsked`.
+
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
+
+-}
 isNeverAsked : Recyclable transportError customError object -> Bool
 isNeverAsked data =
     case data of
