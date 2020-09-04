@@ -1,11 +1,12 @@
 module Remote.Recyclable exposing
-    ( Recyclable(..), SubState(..), GraphqlHttpRecyclable
+    ( Recyclable(..), GraphqlHttpRecyclable
     , firstLoading
     , mergeResponse, toLoading, fromResponse
     , isReady, isError, isCustomError, isTransportError, isLoading, isNeverAsked
     , toError
     , map, mapCustomError, mapTransportError, mapErrors
     , withDefault, merge
+    , RecyclingStage(..)
     )
 
 {-| This module extends [`Data`](Remote-Data) preserving the information when reloading the same source.
@@ -135,12 +136,12 @@ First routine states:
 
   - `NotAsked`
       - We haven't asked for the data yet.
-  - `Fabricating Loading`
+  - `Loading`
       - We've asked, but haven't got an answer yet.
-  - `Fabricating (Failure (Custom error))`
+  - `Failure (Custom error)`
       - We asked, but we received one of the custom-defined errors instead.
         Here's the error.
-  - `Fabricating (Failure (Transport error))`
+  - `Failure (Transport error)`
       - We asked, but something went wrong on the network-side.
         Here's the error.
   - `Ready data`
@@ -148,28 +149,29 @@ First routine states:
 
 Future cycles states:
 
-  - `Recycling data Loading`
+  - `Recycling data LoadingStage`
       - We asked once more, and didn't got the new answer yet. Here's the previous data.
-  - `Recycling data (Failure (Custom error))`
+  - `Recycling data (FailureStage (Custom error))`
       - We asked once more, but the new answer was one of the custom-defined errors instead.
         Here's the previous data and the current error.
-  - `Recycling data (Failure (Transport error))`
+  - `Recycling data (FailureStage (Transport error))`
       - We asked once more, but the new request got lost on the network-side.
         Here's the previous data and the current error.
 
 -}
 type Recyclable transportError customError object
     = NeverAsked
-    | Fabricating (SubState transportError customError)
-    | Ready object
-    | Recycling object (SubState transportError customError)
-
-
-{-| Indicates `Failure` and `Loading` state when data is/was being fetched.
--}
-type SubState transportError customError
-    = Loading
+    | Loading
     | Failure (RemoteError transportError customError)
+    | Ready object
+    | Recycling object (RecyclingStage transportError customError)
+
+
+{-| Indicates `FailureStage` and `LoadingStage` stage when data is/was being fetched.
+-}
+type RecyclingStage transportError customError
+    = LoadingStage
+    | FailureStage (RemoteError transportError customError)
 
 
 {-| While [`Recyclable`](#Recyclable) can model any type of errors,
@@ -197,7 +199,7 @@ use `firstLoading` in this case. Like this:
 -}
 firstLoading : Recyclable transportError customError object
 firstLoading =
-    Fabricating Loading
+    Loading
 
 
 {-| This is the update routine for when overwriting the current
@@ -224,16 +226,19 @@ mergeResponse response data =
         Response.Failure error ->
             case data of
                 NeverAsked ->
-                    Fabricating (Failure error)
+                    Failure error
 
-                Fabricating _ ->
-                    Fabricating (Failure error)
+                Failure _ ->
+                    Failure error
+
+                Loading ->
+                    Failure error
 
                 Recycling object _ ->
-                    Recycling object (Failure error)
+                    Recycling object (FailureStage error)
 
                 Ready object ->
-                    Recycling object (Failure error)
+                    Recycling object (FailureStage error)
 
 
 {-| Convert a `Response`, probably produced from a query result, to a `Recyclable` value.
@@ -248,7 +253,7 @@ fromResponse :
 fromResponse response =
     case response of
         Response.Failure error ->
-            Fabricating (Failure error)
+            Failure error
 
         Response.Success object ->
             Ready object
@@ -278,22 +283,22 @@ merge default data =
         NeverAsked ->
             default
 
-        Fabricating Loading ->
+        Loading ->
             default
 
-        Recycling _ Loading ->
+        Recycling _ LoadingStage ->
             default
 
-        Fabricating (Failure (Custom object)) ->
+        Failure (Custom object) ->
             object
 
-        Fabricating (Failure (Transport object)) ->
+        Failure (Transport object) ->
             object
 
-        Recycling _ (Failure (Custom object)) ->
+        Recycling _ (FailureStage (Custom object)) ->
             object
 
-        Recycling _ (Failure (Transport object)) ->
+        Recycling _ (FailureStage (Transport object)) ->
             object
 
         Ready object ->
@@ -307,16 +312,19 @@ toLoading : Recyclable transportError customError object -> Recyclable transport
 toLoading data =
     case data of
         NeverAsked ->
-            Fabricating Loading
+            Loading
 
-        Fabricating _ ->
-            Fabricating Loading
+        Loading ->
+            Loading
+
+        Failure _ ->
+            Loading
 
         Recycling object _ ->
-            Recycling object Loading
+            Recycling object LoadingStage
 
         Ready object ->
-            Recycling object Loading
+            Recycling object LoadingStage
 
 
 {-| Apply a function to the values in `Recycling value _` and `Ready value`.
@@ -328,8 +336,11 @@ map applier data =
         NeverAsked ->
             NeverAsked
 
-        Fabricating subState ->
-            Fabricating subState
+        Loading ->
+            Loading
+
+        Failure error ->
+            Failure error
 
         Recycling object subState ->
             Recycling (applier object) subState
@@ -344,26 +355,26 @@ If the data is anything else, the same value will propagate through.
 mapErrors : (RemoteError transportError customError -> a) -> Recyclable transportError customError b -> Recyclable a a b
 mapErrors applier data =
     case data of
-        Recycling object (Failure (Custom error)) ->
-            Recycling object (Failure (Custom (applier (Custom error))))
+        Recycling object (FailureStage (Custom error)) ->
+            Recycling object (FailureStage (Custom (applier (Custom error))))
 
-        Recycling object (Failure (Transport error)) ->
-            Recycling object (Failure (Transport (applier (Transport error))))
+        Recycling object (FailureStage (Transport error)) ->
+            Recycling object (FailureStage (Transport (applier (Transport error))))
 
-        Fabricating (Failure (Custom error)) ->
-            Fabricating (Failure (Custom (applier (Custom error))))
+        Failure (Custom error) ->
+            Failure (Custom (applier (Custom error)))
 
-        Fabricating (Failure (Transport error)) ->
-            Fabricating (Failure (Transport (applier (Transport error))))
+        Failure (Transport error) ->
+            Failure (Transport (applier (Transport error)))
 
         NeverAsked ->
             NeverAsked
 
-        Recycling object Loading ->
-            Recycling object Loading
+        Recycling object LoadingStage ->
+            Recycling object LoadingStage
 
-        Fabricating Loading ->
-            Fabricating Loading
+        Loading ->
+            Loading
 
         Ready object ->
             Ready object
@@ -375,26 +386,26 @@ If the data is anything else, the same value will propagate through.
 mapCustomError : (customError -> a) -> Recyclable transportError customError object -> Recyclable transportError a object
 mapCustomError applier response =
     case response of
-        Recycling object (Failure (Custom error)) ->
-            Recycling object (Failure (Custom (applier error)))
+        Recycling object (FailureStage (Custom error)) ->
+            Recycling object (FailureStage (Custom (applier error)))
 
-        Recycling object (Failure (Transport error)) ->
-            Recycling object (Failure (Transport error))
+        Recycling object (FailureStage (Transport error)) ->
+            Recycling object (FailureStage (Transport error))
 
-        Fabricating (Failure (Custom error)) ->
-            Fabricating (Failure (Custom (applier error)))
+        Failure (Custom error) ->
+            Failure (Custom (applier error))
 
-        Fabricating (Failure (Transport error)) ->
-            Fabricating (Failure (Transport error))
+        Failure (Transport error) ->
+            Failure (Transport error)
 
         NeverAsked ->
             NeverAsked
 
-        Recycling object Loading ->
-            Recycling object Loading
+        Recycling object LoadingStage ->
+            Recycling object LoadingStage
 
-        Fabricating Loading ->
-            Fabricating Loading
+        Loading ->
+            Loading
 
         Ready object ->
             Ready object
@@ -406,26 +417,26 @@ If the data is anything else, the same value will propagate through.
 mapTransportError : (transportError -> a) -> Recyclable transportError customError object -> Recyclable a customError object
 mapTransportError applier response =
     case response of
-        Recycling object (Failure (Custom error)) ->
-            Recycling object (Failure (Custom error))
+        Recycling object (FailureStage (Custom error)) ->
+            Recycling object (FailureStage (Custom error))
 
-        Recycling object (Failure (Transport error)) ->
-            Recycling object (Failure (Transport (applier error)))
+        Recycling object (FailureStage (Transport error)) ->
+            Recycling object (FailureStage (Transport (applier error)))
 
-        Fabricating (Failure (Custom error)) ->
-            Fabricating (Failure (Custom error))
+        Failure (Custom error) ->
+            Failure (Custom error)
 
-        Fabricating (Failure (Transport error)) ->
-            Fabricating (Failure (Transport (applier error)))
+        Failure (Transport error) ->
+            Failure (Transport (applier error))
 
         NeverAsked ->
             NeverAsked
 
-        Recycling object Loading ->
-            Recycling object Loading
+        Recycling object LoadingStage ->
+            Recycling object LoadingStage
 
-        Fabricating Loading ->
-            Fabricating Loading
+        Loading ->
+            Loading
 
         Ready object ->
             Ready object
@@ -439,10 +450,10 @@ mapTransportError applier response =
 toError : Recyclable transportError customError object -> Maybe (RemoteError transportError customError)
 toError data =
     case data of
-        Recycling _ (Failure error) ->
+        Recycling _ (FailureStage error) ->
             Just error
 
-        Fabricating (Failure error) ->
+        Failure error ->
             Just error
 
         _ ->
@@ -472,10 +483,10 @@ isReady data =
 isLoading : Recyclable transportError customError object -> Bool
 isLoading data =
     case data of
-        Fabricating Loading ->
+        Loading ->
             True
 
-        Recycling _ Loading ->
+        Recycling _ LoadingStage ->
             True
 
         _ ->
@@ -490,10 +501,10 @@ isLoading data =
 isError : Recyclable transportError customError object -> Bool
 isError data =
     case data of
-        Fabricating (Failure _) ->
+        Failure _ ->
             True
 
-        Recycling _ (Failure _) ->
+        Recycling _ (FailureStage _) ->
             True
 
         _ ->
@@ -508,10 +519,10 @@ isError data =
 isTransportError : Recyclable transportError customError object -> Bool
 isTransportError data =
     case data of
-        Fabricating (Failure (Transport _)) ->
+        Failure (Transport _) ->
             True
 
-        Recycling _ (Failure (Transport _)) ->
+        Recycling _ (FailureStage (Transport _)) ->
             True
 
         _ ->
@@ -526,10 +537,10 @@ isTransportError data =
 isCustomError : Recyclable transportError customError object -> Bool
 isCustomError data =
     case data of
-        Fabricating (Failure (Custom _)) ->
+        Failure (Custom _) ->
             True
 
-        Recycling _ (Failure (Custom _)) ->
+        Recycling _ (FailureStage (Custom _)) ->
             True
 
         _ ->
