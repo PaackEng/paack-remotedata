@@ -2,7 +2,7 @@ module Remote.Response exposing
     ( Response(..), GraphqlHttpResponse
     , fromResults, graphqlHttpToMsg
     , isSuccess, isFailure, isCustomError, isTransportError
-    , toMaybe, getError
+    , toMaybe, toError
     , map, mapCustomError, mapTransportError, mapErrors
     , withDefault, merge
     )
@@ -29,7 +29,7 @@ Without it, the type of these results would need to be something like `Response 
 
 # Common transformations
 
-@docs toMaybe, getError
+@docs toMaybe, toError
 
 
 # Generic transformations
@@ -57,7 +57,7 @@ type Response transportError customError object
 
 {-| While [`Response`](#Response) can model any type of errors,
 the most common one Paack has encountered is when fetching data from a Graphql query,
-and get back [`GraphqlError`][GraphqlError].
+and getting back a [`GraphqlError`][GraphqlError].
 Because of that, `GraphqlHttpResponse` is provided as a useful alias.
 
 [GraphqlError]: /packages/dillonkearns/elm-graphql/latest/Graphql-Http-GraphqlError
@@ -70,7 +70,7 @@ type alias GraphqlHttpResponse customError object =
 
 {-| `True` when `Success _`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isSuccess : Response transportError customError object -> Bool
@@ -85,7 +85,7 @@ isSuccess response =
 
 {-| `True` when `Failure _`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isFailure : Response transportError customError object -> Bool
@@ -100,7 +100,7 @@ isFailure response =
 
 {-| `True` when `Failure (Custom _)`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isCustomError : Response transportError customError object -> Bool
@@ -115,7 +115,7 @@ isCustomError response =
 
 {-| `True` when `Failure (Transport _)`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isTransportError : Response transportError customError object -> Bool
@@ -152,7 +152,7 @@ fromResults results =
 {-| Convert to a simpler `Maybe` if the actual error message is not needed or
 you need to interact with some code that primarily uses maybes.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 toMaybe : Response transportError customError object -> Maybe object
@@ -167,11 +167,11 @@ toMaybe response =
 
 {-| Transforms `Failure error` into `Just error`, and `Success _` into `Nothing`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
-getError : Response transportError customError object -> Maybe (RemoteError transportError customError)
-getError response =
+toError : Response transportError customError object -> Maybe (RemoteError transportError customError)
+toError response =
     case response of
         Failure error ->
             Just error
@@ -199,7 +199,7 @@ graphqlHttpToMsg message input =
         |> message
 
 
-{-| Apply a function to a posive result. If the result is `Success`, it will be converted.
+{-| Apply a function to a successful value. If the result is `Success`, it will be converted.
 If the result is a `Failure`, the same error value will propagate through.
 -}
 map : (a -> b) -> Response transportError customError a -> Response transportError customError b
@@ -263,7 +263,7 @@ mapTransportError applier response =
 {-| If the result is `Success` return the value,
 but if the result is a `Failure` then return a given default value.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 withDefault : object -> Response transportError customError object -> object
@@ -276,7 +276,7 @@ withDefault default response =
             object
 
 
-{-| Perfumery for doing pipes instead of switch-case.
+{-| For doing pipes instead of switch-case.
 
     someResponse
         |> Response.map (always "Success")

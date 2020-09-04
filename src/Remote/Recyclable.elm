@@ -3,7 +3,7 @@ module Remote.Recyclable exposing
     , firstLoading
     , mergeResponse, toLoading, fromResponse
     , isReady, isError, isCustomError, isTransportError, isLoading, isNeverAsked
-    , getError
+    , toError
     , map, mapCustomError, mapTransportError, mapErrors
     , withDefault, merge
     )
@@ -118,7 +118,7 @@ Then, on "update" you're gonna be using either:
 
 # Common transformations
 
-@docs getError
+@docs toError
 @docs map, mapCustomError, mapTransportError, mapErrors
 @docs withDefault, merge
 
@@ -129,7 +129,7 @@ import Remote.Errors exposing (RemoteError(..))
 import Remote.Response as Response exposing (Response)
 
 
-{-| A representation for fetchable-data with eight states:
+{-| A representation for fetchable data with eight states:
 
 First routine states:
 
@@ -174,7 +174,7 @@ type SubState transportError customError
 
 {-| While [`Recyclable`](#Recyclable) can model any type of errors,
 the most common one Paack has encountered is when fetching data from a Graphql query,
-and get back [`GraphqlError`][GraphqlError].
+and getting back a [`GraphqlError`][GraphqlError].
 Because of that, `GraphqlHttpRecyclable` is provided as a useful alias.
 
 [GraphqlError]: /packages/dillonkearns/elm-graphql/latest/Graphql-Http-GraphqlError
@@ -257,7 +257,7 @@ fromResponse response =
 {-| If the recyclable is `Success` return the value,
 but if the recyclable is anything else, then return a given default value.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 withDefault : object -> Recyclable transportError customError object -> object
@@ -270,7 +270,7 @@ withDefault default data =
             default
 
 
-{-| Perfumery for doing pipes instead of switch-case
+{-| For doing pipes instead of switch-case
 -}
 merge : object -> Recyclable object object object -> object
 merge default data =
@@ -319,8 +319,8 @@ toLoading data =
             Recycling object Loading
 
 
-{-| Apply a function to a positive (current or previous) value.
-If the data doesn't contain a positive value, the same value will propagate through.
+{-| Apply a function to the values in `Recycling value _` and `Ready value`.
+If the data is anything else, the same value will propagate through.
 -}
 map : (a -> b) -> Recyclable transportError customError a -> Recyclable transportError customError b
 map applier data =
@@ -433,11 +433,11 @@ mapTransportError applier response =
 
 {-| Transforms `Failure error` into `Just error`, and anything else into `Nothing`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
-getError : Recyclable transportError customError object -> Maybe (RemoteError transportError customError)
-getError data =
+toError : Recyclable transportError customError object -> Maybe (RemoteError transportError customError)
+toError data =
     case data of
         Recycling _ (Failure error) ->
             Just error
@@ -451,7 +451,7 @@ getError data =
 
 {-| `True` when `Ready _`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isReady : Recyclable transportError customError object -> Bool
@@ -466,7 +466,7 @@ isReady data =
 
 {-| `True` when `_ Loading`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isLoading : Recyclable transportError customError object -> Bool
@@ -484,7 +484,7 @@ isLoading data =
 
 {-| `True` when `_ (Failure _)`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isError : Recyclable transportError customError object -> Bool
@@ -502,7 +502,7 @@ isError data =
 
 {-| `True` when `_ (Failure (Transport _))`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isTransportError : Recyclable transportError customError object -> Bool
@@ -520,7 +520,7 @@ isTransportError data =
 
 {-| `True` when `_ (Failure (Custom _))`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isCustomError : Recyclable transportError customError object -> Bool
@@ -538,7 +538,7 @@ isCustomError data =
 
 {-| `True` when `NeverAsked`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isNeverAsked : Recyclable transportError customError object -> Bool

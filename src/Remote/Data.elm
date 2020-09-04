@@ -2,7 +2,7 @@ module Remote.Data exposing
     ( RemoteData(..), GraphqlHttpData
     , fromResponse
     , isSuccess, isError, isCustomError, isTransportError, isLoading, isNotAsked
-    , getError
+    , toError
     , map, mapCustomError, mapTransportError, mapErrors
     , withDefault, merge
     )
@@ -34,7 +34,7 @@ and aliasing `GraphqlError` instead of `Http.Error`.
 
 # Common transformations
 
-@docs getError
+@docs toError
 @docs map, mapCustomError, mapTransportError, mapErrors
 @docs withDefault, merge
 
@@ -67,7 +67,7 @@ type RemoteData transportError customError object
 
 {-| While [`RemoteData`](#RemoteData) can model any type of errors,
 the most common one Paack has encountered is when fetching data from a Graphql query,
-and get back [`GraphqlError`][GraphqlError].
+and getting back a [`GraphqlError`][GraphqlError].
 Because of that, `GraphqlHttpData` is provided as a useful alias.
 
 Based on [Kris's `WebData`][original].
@@ -102,7 +102,7 @@ fromResponse response =
 {-| If the data is `Success` return its value,
 but if the data is anything else then return a given default alternative.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 withDefault : object -> RemoteData transportError customError object -> object
@@ -115,7 +115,7 @@ withDefault default data =
             default
 
 
-{-| Perfumery for doing pipes instead of switch-case.
+{-| For doing pipes instead of switch-case.
 
     someData
         |> RemoteData.map (always "Success")
@@ -230,11 +230,11 @@ mapTransportError applier response =
 
 {-| Transforms `Failure error` into `Just error`, and anything else into `Nothing`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
-getError : RemoteData transportError customError object -> Maybe (RemoteError transportError customError)
-getError data =
+toError : RemoteData transportError customError object -> Maybe (RemoteError transportError customError)
+toError data =
     case data of
         Failure error ->
             Just error
@@ -251,7 +251,7 @@ getError data =
 
 {-| `True` when `Success _`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isSuccess : RemoteData transportError customError object -> Bool
@@ -266,7 +266,7 @@ isSuccess data =
 
 {-| `True` when `Loading _`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isLoading : RemoteData transportError customError object -> Bool
@@ -281,7 +281,7 @@ isLoading data =
 
 {-| `True` when `Failure _`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isError : RemoteData transportError customError object -> Bool
@@ -296,7 +296,7 @@ isError data =
 
 {-| `True` when `Failure (Transport _)`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isTransportError : RemoteData transportError customError object -> Bool
@@ -311,7 +311,7 @@ isTransportError data =
 
 {-| `True` when `Failure (isCustomError _)`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isCustomError : RemoteData transportError customError object -> Bool
@@ -326,7 +326,7 @@ isCustomError data =
 
 {-| `True` when `NotAsked`.
 
-**NOTE**: This function implicates in information-loss. Prefer using a switch-case, or use it very wisely.
+**NOTE**: This function opposes the purpose of this package by eliminating not aimed states. Always evaluate using a switch-case instead.
 
 -}
 isNotAsked : RemoteData transportError customError object -> Bool
