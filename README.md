@@ -150,10 +150,10 @@ selectedAuthorView model =
         Recyclable.NeverAsked ->
             Element.text "Please, pick an author!"
 
-        Recyclable.Fabricating Recyclable.Loading ->
+        Recyclable.Loading ->
             Element.text "Loading"
 
-        Recyclable.Fabricating (Recyclable.Failure _) ->
+        Recyclable.Failure _ ->
             Element.text "Failed to load author!"
 
         Recyclable.Recycling { name } newState ->
