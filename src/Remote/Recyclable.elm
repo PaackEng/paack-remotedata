@@ -3,9 +3,9 @@ module Remote.Recyclable exposing
     , firstLoading
     , mergeResponse, toLoading, fromResponse
     , isReady, isError, isCustomError, isTransportError, isLoading, isNeverAsked
-    , toError
     , map, mapCustomError, mapTransportError, mapErrors
-    , withDefault, merge
+    , toError, withDefault, merge
+    , reduceMaybe
     )
 
 {-| This module extends [`Data`](Remote-Data) preserving the information when reloading the same source.
@@ -118,9 +118,9 @@ Then, on "update" you're gonna be using either:
 
 # Common transformations
 
-@docs toError
 @docs map, mapCustomError, mapTransportError, mapErrors
-@docs withDefault, merge
+@docs toError, withDefault, merge
+@docs reduceMaybe
 
 -}
 
@@ -559,3 +559,24 @@ isNeverAsked data =
 
         _ ->
             False
+
+
+{-| This helper was projected for reducing switch-case entries when working with collections.
+
+    case
+        entries
+            |> Dict.get id
+            |> RemoteData.reduceMaybe
+    of
+        Recyclable.NeverAsked ->
+            Element.text "Request was never prompted"
+
+        _ ->
+            Element.text "Request was once prompted"
+
+-}
+reduceMaybe :
+    Maybe (RemoteData transportError customError object)
+    -> RemoteData transportError customError object
+reduceMaybe maybe =
+    Maybe.withDefault NotAsked maybe

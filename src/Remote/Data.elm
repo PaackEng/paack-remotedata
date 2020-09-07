@@ -2,9 +2,9 @@ module Remote.Data exposing
     ( RemoteData(..), GraphqlHttpData
     , fromResponse
     , isSuccess, isError, isCustomError, isTransportError, isLoading, isNotAsked
-    , toError
     , map, mapCustomError, mapTransportError, mapErrors
-    , withDefault, merge
+    , toError, withDefault, merge
+    , reduceMaybe
     )
 
 {-| A datatype representing fetched data in five different states.
@@ -34,9 +34,9 @@ and aliasing `GraphqlError` instead of `Http.Error`.
 
 # Common transformations
 
-@docs toError
 @docs map, mapCustomError, mapTransportError, mapErrors
-@docs withDefault, merge
+@docs toError, withDefault, merge
+@docs reduceMaybe
 
 -}
 
@@ -337,3 +337,24 @@ isNotAsked data =
 
         _ ->
             False
+
+
+{-| This helper was projected for reducing switch-case entries when working with collections.
+
+    case
+        entries
+            |> Dict.get id
+            |> RemoteData.reduceMaybe
+    of
+        RemoteData.NotAsked ->
+            Element.text "Request was never prompted"
+
+        _ ->
+            Element.text "Request was once prompted"
+
+-}
+reduceMaybe :
+    Maybe (RemoteData transportError customError object)
+    -> RemoteData transportError customError object
+reduceMaybe maybe =
+    Maybe.withDefault NotAsked maybe
