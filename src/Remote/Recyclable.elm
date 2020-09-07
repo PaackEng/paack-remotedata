@@ -566,7 +566,7 @@ isNeverAsked data =
     case
         entries
             |> Dict.get id
-            |> RemoteData.reduceMaybe
+            |> Recyclable.reduceMaybe
     of
         Recyclable.NeverAsked ->
             Element.text "Request was never prompted"
@@ -576,7 +576,7 @@ isNeverAsked data =
 
 -}
 reduceMaybe :
-    Maybe (RemoteData transportError customError object)
-    -> RemoteData transportError customError object
+    Maybe (Recyclable transportError customError object)
+    -> Recyclable transportError customError object
 reduceMaybe maybe =
-    Maybe.withDefault NotAsked maybe
+    Maybe.withDefault NeverAsked maybe
