@@ -10,7 +10,7 @@ module Remote.Recyclable exposing
 
 {-| This module extends [`Data`](Remote-Data) preserving the information when reloading the same source.
 
-It helps in scenarios with like this:
+It helps in scenarios like the following routine:
 
 1.  Data was never requested
       - Start it with `Recyclable.NeverAsked`
