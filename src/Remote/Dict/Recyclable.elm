@@ -24,7 +24,10 @@ import Remote.Recyclable as Recyclable exposing (Recyclable)
 import Remote.Response exposing (Response)
 
 
-{-| Reduce the result of a `Dict.get` operation by transforming `Nothing` in `NeverAsked`.
+{-| Reduce the result of a [`Dict.get`][dict-get] operation by transforming `Nothing` in [`NeverAsked`](Remote-Recyclable#Recyclable).
+
+[dict-get]: /packages/elm/core/latest/Dict#get
+
 -}
 get :
     comparable
@@ -36,7 +39,10 @@ get key dict =
         |> Maybe.withDefault Recyclable.NeverAsked
 
 
-{-| Similar to [`Dict.update`][dict-update], but using `NeverAsked` for not-found keys and also for dropping updated values.
+{-| Similar to [`Dict.update`][dict-update], but using [`NeverAsked`](Remote-Recyclable#Recyclable) for not-found keys and also for dropping updated values.
+
+[dict-update]: /packages/elm/core/latest/Dict#update
+
 -}
 update :
     comparable
@@ -61,6 +67,9 @@ update key applier =
 
 
 {-| Shortcut for updating one value back to its loading state.
+
+See [`Recyclable.toLoading`]((Remote-Recyclable#toLoading) for the operation description.
+
 -}
 toLoading :
     comparable
@@ -71,6 +80,9 @@ toLoading key =
 
 
 {-| Shortcut for merging a new freshily-fetched response to the current state.
+
+See [`Recyclable.mergeResponse`]((Remote-Recyclable#mergeResponse) for the operation description.
+
 -}
 mergeResponse :
     comparable
