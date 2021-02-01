@@ -4,7 +4,7 @@
   "description": "A different approach to Kris Jenkins' RemoteData, GraphQL specialized, and includes Recyclable for refreshable data.",
   "dependencies": {},
   "devDependencies": {
-    "elm": "^0.19.1-4",
+    "elm": "^0.19.1-5",
     "elm-analyse": "^0.16.5",
     "elm-format": "^0.8.4"
   },
