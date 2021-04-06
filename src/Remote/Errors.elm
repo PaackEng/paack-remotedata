@@ -18,7 +18,7 @@ type RemoteError transportError customError
 
 {-| Implementation of [`RemoteError`](#RemoteError) for failures containing [`Graphql.Http.GraphqlError`][GraphqlError]
 
-[GraphqlError]: /dillonkearns/elm-graphql/latest/Graphql-Http-GraphqlError
+[GraphqlError]: /packages/dillonkearns/elm-graphql/latest/Graphql-Http-GraphqlError
 
 -}
 type alias GraphqlHttpError customError =
